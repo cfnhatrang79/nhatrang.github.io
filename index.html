@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIN-PRO v8 | Black IP Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #e0e0e0; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f97316; }
+        .glass-panel { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <!-- Loading Overlay -->
+    <div id="loading-screen" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="mono text-[10px] tracking-[0.4em] uppercase text-orange-500 animate-pulse italic">Initializing Secure Protocols...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="hidden fixed inset-0 z-[90] bg-black flex items-center justify-center p-4">
+        <div class="w-full max-w-sm glass-panel p-10 rounded-xl shadow-2xl border border-orange-900/20">
+            <div class="w-14 h-14 bg-orange-600 rounded-xl flex items-center justify-center mx-auto mb-8 text-black shadow-[0_0_30px_rgba(234,88,12,0.3)]">
+                <i data-lucide="shield" stroke-width="3"></i>
+            </div>
+            <h2 class="text-xl font-black uppercase text-white mb-1 text-center tracking-[0.2em] italic">Security Portal</h2>
+            <p class="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] mb-10 text-center underline decoration-orange-600">FIN-PRO v8 Black IP</p>
+            
+            <div class="space-y-4">
+                <div id="login-error" class="hidden p-3 bg-red-900/20 text-red-500 text-[9px] font-black uppercase rounded border border-red-900/50 text-center"></div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-zinc-600 uppercase tracking-widest ml-1">Identity ID</label>
+                    <input id="login-user" type="text" class="w-full p-4 bg-zinc-950 border border-zinc-900 rounded-lg mono text-xs text-white outline-none focus:border-orange-600 transition-all" placeholder="Enter ID...">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[8px] font-black text-zinc-600 uppercase tracking-widest ml-1">Access Key</label>
+                    <input id="login-pass" type="password" class="w-full p-4 bg-zinc-950 border border-zinc-900 rounded-lg mono text-xs text-white outline-none focus:border-orange-600 transition-all" placeholder="••••••••">
+                </div>
+                <button id="btn-login" class="w-full py-4 bg-orange-600 text-black rounded-lg font-black text-[10px] uppercase tracking-[0.3em] hover:bg-orange-500 active:scale-[0.98] transition-all mt-6 shadow-lg shadow-orange-900/20">
+                    Verify Identity
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Shell -->
+    <div id="app-shell" class="hidden flex h-screen overflow-hidden">
+        <!-- Desktop Sidebar -->
+        <aside class="hidden md:flex w-64 flex-col bg-[#050505] border-r border-zinc-900">
+            <div class="p-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-orange-600 rounded flex items-center justify-center text-black">
+                        <i data-lucide="zap" size="18" stroke-width="3"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-lg tracking-tighter text-white uppercase italic leading-none">FIN-PRO <span class="text-orange-500">v8</span></h1>
+                        <p class="text-[7px] text-zinc-600 font-bold uppercase tracking-widest mt-1">Institutional Grade</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2 mt-4" id="main-nav">
+                <!-- Nav items added via JS -->
+            </nav>
+
+            <div class="p-4 border-t border-zinc-900">
+                <button id="btn-logout" class="w-full flex items-center justify-center gap-2 py-3 bg-zinc-900/50 text-zinc-500 hover:text-red-500 hover:bg-red-950/20 rounded-lg font-bold text-[10px] uppercase transition-all border border-zinc-900">
+                    <i data-lucide="log-out" size="14"></i> Logout System
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col min-w-0 bg-black">
+            <header class="h-16 border-b border-zinc-900 flex items-center justify-between px-6 bg-[#050505]/50 backdrop-blur-md">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden p-2 text-zinc-400" id="btn-mobile-menu"><i data-lucide="menu"></i></button>
+                    <div class="flex items-center gap-2">
+                        <span class="status-dot bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest" id="page-title">DASHBOARD</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-md">
+                        <i data-lucide="cpu" size="12" class="text-orange-600"></i>
+                        <span class="mono text-[9px] text-zinc-500" id="current-user-badge">STAFF-01</span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="content-viewport" class="flex-1 overflow-y-auto p-6 md:p-10 space-y-8">
+                <!-- Content injected here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase & System Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, doc, collection, onSnapshot, addDoc, updateDoc, setDoc, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+        // CONFIGURATION
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'fin-pro-v8-live';
+        
+        // INIT
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // STATE
+        let state = {
+            user: null,
+            role: localStorage.getItem('fin_v8_role') || 'guest',
+            customers: [],
+            transactions: [],
+            capital: { total: 0 },
+            activeTab: 'dashboard'
+        };
+
+        // UI HELPERS
+        const $ = (id) => document.getElementById(id);
+        const show = (id) => $(id).classList.remove('hidden');
+        const hide = (id) => $(id).classList.add('hidden');
+
+        // NAVIGATION CONFIG
+        const MENU_ITEMS = [
+            { id: 'dashboard', label: 'Tổng quan', icon: 'layout-dashboard' },
+            { id: 'daily', label: 'Thu nợ nhanh', icon: 'zap' },
+            { id: 'customers', label: 'Hợp đồng', icon: 'user-plus' },
+            { id: 'history', label: 'Nhật ký', icon: 'history' },
+            { id: 'settings', label: 'Admin', icon: 'shield-check', adminOnly: true }
+        ];
+
+        // STARTUP
+        window.onload = async () => {
+            lucide.createIcons();
+            
+            // Auth Logic
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            onAuthStateChanged(auth, (u) => {
+                state.user = u;
+                if (u && state.role !== 'guest') {
+                    initApp();
+                } else {
+                    hide('loading-screen');
+                    show('login-screen');
+                }
+            });
+        };
+
+        // AUTHENTICATION
+        $('btn-login').onclick = () => {
+            const user = $('login-user').value;
+            const pass = $('login-pass').value;
+            
+            // Dummy logic for demo (In real app, fetch from staff collection)
+            if (user === 'admin' && pass === 'admin') {
+                state.role = 'admin';
+                localStorage.setItem('fin_v8_role', 'admin');
+                initApp();
+            } else if (user && pass) {
+                state.role = 'staff';
+                localStorage.setItem('fin_v8_role', 'staff');
+                initApp();
+            } else {
+                const err = $('login-error');
+                err.innerText = "Sai thông tin truy cập";
+                err.classList.remove('hidden');
+            }
+        };
+
+        $('btn-logout').onclick = () => {
+            localStorage.removeItem('fin_v8_role');
+            location.reload();
+        };
+
+        // CORE APP INIT
+        function initApp() {
+            hide('loading-screen');
+            hide('login-screen');
+            show('app-shell');
+            renderNav();
+            loadData();
+            renderPage();
+            $('current-user-badge').innerText = state.role.toUpperCase();
+        }
+
+        function loadData() {
+            const getCol = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+            
+            // Realtime Sync
+            onSnapshot(getCol('customers'), (s) => {
+                state.customers = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (state.activeTab === 'dashboard' || state.activeTab === 'customers') renderPage();
+            });
+
+            onSnapshot(getCol('transactions'), (s) => {
+                state.transactions = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (state.activeTab === 'dashboard' || state.activeTab === 'history') renderPage();
+            });
+
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'capital', 'main'), (s) => {
+                if (s.exists()) state.capital = s.data();
+                if (state.activeTab === 'dashboard') renderPage();
+            });
+        }
+
+        function renderNav() {
+            const nav = $('main-nav');
+            nav.innerHTML = MENU_ITEMS
+                .filter(item => !item.adminOnly || state.role === 'admin')
+                .map(item => `
+                    <button onclick="window.switchTab('${item.id}')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all ${state.activeTab === item.id ? 'bg-orange-600/10 text-orange-500 border-l-2 border-orange-600' : 'text-zinc-500 hover:text-white hover:bg-zinc-900'}" data-tab="${item.id}">
+                        <i data-lucide="${item.icon}" size="18"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest">${item.label}</span>
+                    </button>
+                `).join('');
+            lucide.createIcons();
+        }
+
+        window.switchTab = (tabId) => {
+            state.activeTab = tabId;
+            $('page-title').innerText = tabId.toUpperCase();
+            renderNav();
+            renderPage();
+        };
+
+        // ROUTING / PAGES
+        function renderPage() {
+            const vp = $('content-viewport');
+            
+            switch(state.activeTab) {
+                case 'dashboard':
+                    renderDashboard(vp);
+                    break;
+                case 'daily':
+                    renderDaily(vp);
+                    break;
+                case 'customers':
+                    renderCustomers(vp);
+                    break;
+                case 'history':
+                    renderHistory(vp);
+                    break;
+                case 'settings':
+                    renderSettings(vp);
+                    break;
+            }
+            lucide.createIcons();
+        }
+
+        // --- PAGE RENDERING LOGIC ---
+
+        function renderDashboard(container) {
+            const lent = state.customers.reduce((a, c) => a + (Number(c.loanAmount) || 0), 0);
+            const profit = state.transactions.reduce((a, t) => a + (Number(t.amount) || 0), 0);
+            const balance = (state.capital.total || 0) + profit - lent;
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-3 glass-panel p-10 rounded-2xl relative overflow-hidden group">
+                        <p class="text-[10px] font-black uppercase text-zinc-500 tracking-[0.4em] mb-4">Operating Liquidity</p>
+                        <h2 class="text-6xl font-black text-white tracking-tighter tabular-nums mb-10">
+                            ${balance.toLocaleString()}<span class="text-orange-600 text-xl ml-2 tracking-normal">VND</span>
+                        </h2>
+                        <div class="grid grid-cols-2 gap-10 pt-8 border-t border-zinc-900/50">
+                            <div>
+                                <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-2">Total System Capital</p>
+                                <p class="text-xl font-black text-white mono">${(state.capital.total || 0).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-2">Market Exposure</p>
+                                <p class="text-xl font-black text-orange-600 mono">${lent.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <i data-lucide="trending-up" class="absolute right-[-20px] bottom-[-20px] w-64 h-64 text-orange-600/5 rotate-12 group-hover:scale-110 transition-transform duration-1000"></i>
+                    </div>
+                    <div class="glass-panel p-10 rounded-2xl flex flex-col justify-between bg-orange-600/5 border-orange-600/10">
+                        <div>
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="w-12 h-12 bg-orange-600 text-black rounded-xl flex items-center justify-center shadow-lg shadow-orange-900/20">
+                                    <i data-lucide="activity"></i>
+                                </div>
+                                <span class="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Gross Revenue</span>
+                            </div>
+                            <p class="text-4xl font-black text-white tabular-nums">${profit.toLocaleString()}</p>
+                        </div>
+                        <div class="mt-8 pt-4 border-t border-zinc-900">
+                            <div class="flex items-center gap-2 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+                                <span class="status-dot bg-emerald-500"></span> Signal: Optimal
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    ${renderStatCard('Total Contracts', state.customers.length, 'file-text')}
+                    ${renderStatCard('Active Loans', state.customers.filter(c=>c.status==='active').length, 'zap')}
+                    ${renderStatCard('Defaulters', state.customers.filter(c=>c.status==='active' && isDelayed(c, state.transactions)).length, 'alert-octagon', true)}
+                    ${renderStatCard('Recovery Index', Math.round((profit / (lent || 1)) * 100) + '%', 'arrow-up-right')}
+                </div>
+            `;
+        }
+
+        function renderStatCard(label, val, icon, alert = false) {
+            return `
+                <div class="glass-panel p-6 rounded-xl border-l-4 ${alert ? 'border-l-red-600 bg-red-950/5' : 'border-l-zinc-800'} transition-all hover:bg-zinc-900/30">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i data-lucide="${icon}" size="14" class="${alert ? 'text-red-500' : 'text-zinc-600'}"></i>
+                        <p class="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-500">${label}</p>
+                    </div>
+                    <p class="text-2xl font-black ${alert ? 'text-red-500' : 'text-white'} mono">${val}</p>
+                </div>
+            `;
+        }
+
+        function renderDaily(container) {
+            const active = state.customers.filter(c => c.status === 'active');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 glass-panel p-2 rounded-xl max-w-lg">
+                        <i data-lucide="search" class="ml-4 text-zinc-600" size="18"></i>
+                        <input class="flex-1 p-3 bg-transparent font-bold text-xs outline-none text-white uppercase placeholder:text-zinc-800" placeholder="Search Identity Code...">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${active.map(c => `
+                            <div class="glass-panel p-8 rounded-2xl relative group hover:border-orange-600/50 transition-all">
+                                <div class="flex justify-between items-start mb-8">
+                                    <div>
+                                        <h4 class="font-black text-white uppercase text-sm tracking-widest">${c.name}</h4>
+                                        <p class="text-[9px] font-mono text-zinc-600 mt-2 uppercase">Daily quota: <span class="text-orange-500">${Number(c.dailyAmount).toLocaleString()}</span></p>
+                                    </div>
+                                    <div class="text-zinc-800 group-hover:text-orange-600 transition-colors">
+                                        <i data-lucide="crosshair" size="18"></i>
+                                    </div>
+                                </div>
+                                <button onclick="window.payDaily('${c.id}', ${c.dailyAmount})" class="w-full py-4 bg-zinc-950 border border-zinc-900 text-zinc-400 rounded-xl font-black text-[9px] uppercase tracking-[0.3em] hover:bg-orange-600 hover:text-black hover:border-orange-600 active:scale-[0.98] transition-all">
+                                    Capture Payment
+                                </button>
+                                ${isDelayed(c, state.transactions) ? `
+                                    <div class="absolute -top-2 -right-2 flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded-md shadow-lg shadow-red-900/40">
+                                        <i data-lucide="alert-circle" size="10"></i>
+                                        <span class="text-[8px] font-black uppercase tracking-widest">Overdue</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.payDaily = async (id, amount) => {
+            const customer = state.customers.find(c => c.id === id);
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), {
+                customerId: id,
+                customerName: customer.name,
+                amount: Number(amount),
+                date: Timestamp.now(),
+                type: 'daily'
+            });
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'customers', id), {
+                paidAmount: (Number(customer.paidAmount) || 0) + Number(amount)
+            });
+            // Success animation or feedback could go here
+        };
+
+        function renderHistory(container) {
+            const sorted = [...state.transactions].sort((a,b) => b.date?.seconds - a.date?.seconds);
+            container.innerHTML = `
+                <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-zinc-950/50 border-b border-zinc-900">
+                            <tr>
+                                <th class="px-8 py-5 text-[9px] font-black uppercase text-zinc-600 tracking-[0.2em]">Timestamp</th>
+                                <th class="px-8 py-5 text-[9px] font-black uppercase text-zinc-600 tracking-[0.2em]">Subject</th>
+                                <th class="px-8 py-5 text-[9px] font-black uppercase text-zinc-600 tracking-[0.2em]">Classification</th>
+                                <th class="px-8 py-5 text-[9px] font-black uppercase text-zinc-600 tracking-[0.2em] text-right">Value (VND)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-900/50">
+                            ${sorted.map(t => `
+                                <tr class="hover:bg-zinc-900/30 transition-colors">
+                                    <td class="px-8 py-5 mono text-[10px]">
+                                        <span class="text-white">${new Date(t.date?.seconds * 1000).toLocaleDateString()}</span>
+                                        <span class="text-zinc-600 ml-2">${new Date(t.date?.seconds * 1000).toLocaleTimeString()}</span>
+                                    </td>
+                                    <td class="px-8 py-5 text-xs font-black text-zinc-400 uppercase tracking-wider">${t.customerName}</td>
+                                    <td class="px-8 py-5">
+                                        <span class="text-[8px] font-black px-2 py-1 rounded bg-zinc-950 border border-zinc-800 text-zinc-500 uppercase tracking-[0.2em]">
+                                            ${t.type === 'daily' ? 'DAILY_COLLECT' : 'LIQUIDATE'}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-5 text-right font-black text-sm text-emerald-500 mono">+${Number(t.amount).toLocaleString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // --- GLOBAL LOGIC ---
+        function isDelayed(customer, transactions) {
+            const txs = transactions.filter(t => t.customerId === customer.id);
+            if (txs.length === 0) return false;
+            const last = txs.sort((a,b) => b.date?.seconds - a.date?.seconds)[0];
+            const diff = (Date.now() - last.date?.seconds * 1000) / (1000 * 3600 * 24);
+            return diff > 1.5;
+        }
+
+    </script>
+</body>
+</html>
